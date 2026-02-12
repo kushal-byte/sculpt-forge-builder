@@ -27,7 +27,7 @@ const Footer = () => {
             <h4 className="font-display text-xs tracking-[0.3em] text-muted-foreground mb-4">COMPANY</h4>
             <div className="flex flex-col gap-2">
               <Link to="/about" className="text-sm text-foreground/70 hover:text-foreground transition-colors font-body">About</Link>
-              <a href="tel:+918861597475" className="text-sm text-foreground/70 hover:text-foreground transition-colors font-body">+91 88615 97475</a>
+              <span className="text-sm text-foreground/70 font-body">Contact</span>
               <span className="text-sm text-foreground/70 font-body">Size Guide</span>
             </div>
           </div>

@@ -1,3 +1,9 @@
+import productOversizedTee from "@/assets/product-oversized-tee.jpg";
+import productCompressionTee from "@/assets/product-compression-tee.jpg";
+import productPumpCover from "@/assets/product-pump-cover.jpg";
+import productCompressionLs from "@/assets/product-compression-ls.jpg";
+import productHoodie from "@/assets/product-hoodie.jpg";
+import productCompressionLeggings from "@/assets/product-compression-leggings.jpg";
 
 export interface Product {
   id: string;
@@ -25,11 +31,11 @@ export const products: Product[] = [
   {
     id: "oversized-tee-black",
     name: "Oversized Training Tee",
-    price: 1999,
+    price: 45,
     category: "oversized",
     type: "T-Shirt",
-    image: "/placeholder.svg",
-    hoverImage: "/placeholder.svg",
+    image: productOversizedTee,
+    hoverImage: productOversizedTee,
     sizes: ["S", "M", "L", "XL", "XXL"],
     colors: ["Black", "Charcoal", "Off-White"],
     fit: "Relaxed",
@@ -41,11 +47,11 @@ export const products: Product[] = [
   {
     id: "compression-tee-black",
     name: "Compression Performance Tee",
-    price: 2499,
+    price: 55,
     category: "compression",
     type: "T-Shirt",
-    image: "/placeholder.svg",
-    hoverImage: "/placeholder.svg",
+    image: productCompressionTee,
+    hoverImage: productCompressionTee,
     sizes: ["S", "M", "L", "XL", "XXL"],
     colors: ["Black", "Dark Grey"],
     fit: "Tight",
@@ -57,11 +63,11 @@ export const products: Product[] = [
   {
     id: "pump-cover-black",
     name: "Pump Cover Hoodie",
-    price: 3499,
+    price: 75,
     category: "oversized",
     type: "Hoodie",
-    image: "/placeholder.svg",
-    hoverImage: "/placeholder.svg",
+    image: productPumpCover,
+    hoverImage: productPumpCover,
     sizes: ["S", "M", "L", "XL", "XXL"],
     colors: ["Black", "Charcoal"],
     fit: "Oversized",
@@ -72,11 +78,11 @@ export const products: Product[] = [
   {
     id: "compression-ls-black",
     name: "Compression Long Sleeve",
-    price: 2799,
+    price: 60,
     category: "compression",
     type: "Long Sleeve",
-    image: "/placeholder.svg",
-    hoverImage: "/placeholder.svg",
+    image: productCompressionLs,
+    hoverImage: productCompressionLs,
     sizes: ["S", "M", "L", "XL", "XXL"],
     colors: ["Black", "Dark Grey"],
     fit: "Tight",
@@ -88,11 +94,11 @@ export const products: Product[] = [
   {
     id: "relaxed-hoodie-black",
     name: "Relaxed Training Hoodie",
-    price: 3999,
+    price: 85,
     category: "oversized",
     type: "Hoodie",
-    image: "/placeholder.svg",
-    hoverImage: "/placeholder.svg",
+    image: productHoodie,
+    hoverImage: productHoodie,
     sizes: ["S", "M", "L", "XL", "XXL"],
     colors: ["Black", "Charcoal", "Off-White"],
     fit: "Relaxed",
@@ -103,11 +109,11 @@ export const products: Product[] = [
   {
     id: "compression-leggings-black",
     name: "Compression Leggings",
-    price: 2999,
+    price: 65,
     category: "compression",
     type: "Leggings",
-    image: "/placeholder.svg",
-    hoverImage: "/placeholder.svg",
+    image: productCompressionLeggings,
+    hoverImage: productCompressionLeggings,
     sizes: ["S", "M", "L", "XL", "XXL"],
     colors: ["Black"],
     fit: "Tight",
