@@ -1,10 +1,7 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
-import heroImage from "@/assets/hero-image.jpg";
-import collectionOversized from "@/assets/collection-oversized.jpg";
-import collectionCompression from "@/assets/collection-compression.jpg";
-import collectionNewDrops from "@/assets/collection-newdrops.jpg";
+import heroModel from "@/assets/hero-model.png";
 import ProductCard from "@/components/ProductCard";
 import { products } from "@/data/products";
 
@@ -12,21 +9,17 @@ const Index = () => {
   const featuredProducts = products.slice(0, 4);
 
   const collections = [
-    { title: "Oversized Collection", image: collectionOversized, link: "/shop?category=oversized" },
-    { title: "Compression Line", image: collectionCompression, link: "/shop?category=compression" },
-    { title: "New Drops", image: collectionNewDrops, link: "/shop" },
+    { title: "Oversized Collection", link: "/shop?category=oversized" },
+    { title: "Compression Line", link: "/shop?category=compression" },
+    { title: "New Drops", link: "/shop" },
   ];
 
   return (
     <main>
       {/* Hero */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0">
-          <img src={heroImage} alt="SSG Hero" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-background/50 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
-        </div>
-        <div className="relative z-10 max-w-[1400px] mx-auto px-6 w-full">
+      <section className="relative h-screen flex items-center overflow-hidden">
+        <div className="absolute inset-0 bg-background" />
+        <div className="relative z-10 max-w-[1400px] mx-auto px-6 w-full flex flex-col md:flex-row items-center justify-between gap-8">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
@@ -47,6 +40,14 @@ const Index = () => {
               SHOP NOW
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1, delay: 0.3 }}
+            className="flex-shrink-0"
+          >
+            <img src={heroModel} alt="SSG Model" className="h-[500px] md:h-[700px] object-contain" />
           </motion.div>
         </div>
       </section>
@@ -70,16 +71,12 @@ const Index = () => {
               transition={{ duration: 0.6, delay: i * 0.15 }}
               viewport={{ once: true }}
             >
-              <Link to={col.link} className="group relative block overflow-hidden aspect-[3/4]">
-                <img
-                  src={col.image}
-                  alt={col.title}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-background/40 group-hover:bg-background/20 transition-colors duration-500" />
-                <div className="absolute bottom-0 left-0 right-0 p-6">
-                  <h3 className="font-display text-xl tracking-wider text-foreground">{col.title}</h3>
-                  <span className="mt-2 inline-flex items-center gap-2 font-display text-xs tracking-[0.2em] text-foreground/70 group-hover:text-foreground transition-colors">
+              <Link to={col.link} className="group relative block overflow-hidden aspect-[3/4] bg-secondary border border-border">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <h3 className="font-display text-2xl tracking-wider text-foreground">{col.title}</h3>
+                </div>
+                <div className="absolute bottom-0 left-0 right-0 p-6 text-center">
+                  <span className="inline-flex items-center gap-2 font-display text-xs tracking-[0.2em] text-muted-foreground group-hover:text-foreground transition-colors">
                     EXPLORE <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
                   </span>
                 </div>
@@ -124,21 +121,11 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Social Proof Grid */}
+      {/* Social Proof */}
       <section className="bg-card border-y border-border py-24">
-        <div className="max-w-[1400px] mx-auto px-6">
-          <h2 className="font-display text-2xl md:text-3xl tracking-wider text-center mb-12 text-foreground">#SUPERIORSCULPT</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-1">
-            {products.map((p) => (
-              <div key={p.id} className="aspect-square overflow-hidden group cursor-pointer">
-                <img
-                  src={p.image}
-                  alt={p.name}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-              </div>
-            ))}
-          </div>
+        <div className="max-w-[1400px] mx-auto px-6 text-center">
+          <h2 className="font-display text-2xl md:text-3xl tracking-wider mb-6 text-foreground">#SUPERIORSCULPT</h2>
+          <p className="font-body text-muted-foreground text-sm max-w-lg mx-auto">Follow us on Instagram for the latest drops, training content, and community highlights.</p>
         </div>
       </section>
     </main>

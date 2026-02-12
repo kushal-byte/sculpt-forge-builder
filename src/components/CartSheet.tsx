@@ -63,7 +63,7 @@ const CartSheet = () => {
                             </button>
                           </div>
                           <div className="flex items-center gap-3">
-                            <span className="text-sm font-body">${item.product.price * item.quantity}</span>
+                            <span className="text-sm font-body">₹{item.product.price * item.quantity}</span>
                             <button onClick={() => removeItem(item.product.id, item.size)} className="text-muted-foreground hover:text-foreground">
                               <X className="w-3 h-3" />
                             </button>
@@ -81,7 +81,7 @@ const CartSheet = () => {
               <div className="border-t border-border px-6 py-6 space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="font-display tracking-widest text-sm">TOTAL</span>
-                  <span className="font-display text-lg">${totalPrice}</span>
+                  <span className="font-display text-lg">₹{totalPrice}</span>
                 </div>
                 <button className="w-full bg-foreground text-background font-display tracking-[0.2em] py-4 text-sm hover:bg-foreground/90 transition-colors">
                   CHECKOUT
