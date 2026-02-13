@@ -17,7 +17,7 @@ const Index = () => {
   return (
     <main>
       {/* Hero */}
-      <section className="relative h-screen flex items-center overflow-hidden">
+      <section className="relative min-h-screen flex items-center overflow-hidden pt-20">
         <div className="absolute inset-0 bg-background" />
         <div className="relative z-10 max-w-[1400px] mx-auto px-6 w-full flex flex-col md:flex-row items-center justify-between gap-8">
           <motion.div
