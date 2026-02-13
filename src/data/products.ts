@@ -21,6 +21,10 @@ export interface Product {
   };
 }
 
+import productOversizedTee from "@/assets/product-oversized-tee.jpg";
+import productOversizedTeeBack from "@/assets/product-oversized-tee-back.png";
+import productOversizedTeeModel from "@/assets/product-oversized-tee-model.jpg";
+
 export const products: Product[] = [
   {
     id: "oversized-tee-black",
@@ -28,8 +32,8 @@ export const products: Product[] = [
     price: 1999,
     category: "oversized",
     type: "T-Shirt",
-    image: "/placeholder.svg",
-    hoverImage: "/placeholder.svg",
+    image: productOversizedTee,
+    hoverImage: productOversizedTeeModel,
     sizes: ["S", "M", "L", "XL", "XXL"],
     colors: ["Black", "Charcoal", "Off-White"],
     fit: "Relaxed",
