@@ -68,7 +68,7 @@ const ProductDetail = () => {
               <span className="inline-block mb-4 text-[10px] font-display tracking-[0.2em] text-ssg-gold">{product.badge}</span>
             )}
             <h1 className="font-display text-3xl md:text-4xl tracking-wider text-foreground">{product.name}</h1>
-            <p className="mt-3 font-display text-2xl text-foreground">${product.price}</p>
+            <p className="mt-3 font-display text-2xl text-foreground">₹{product.price}</p>
 
             <p className="mt-6 font-body text-sm text-muted-foreground leading-relaxed">{product.description}</p>
 
