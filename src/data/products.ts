@@ -24,6 +24,7 @@ export interface Product {
 import productOversizedTee from "@/assets/product-oversized-tee.jpg";
 import productOversizedTeeBack from "@/assets/product-oversized-tee-back.png";
 import productOversizedTeeModel from "@/assets/product-oversized-tee-model.jpg";
+import productOversizedTeeBackBlack from "@/assets/product-oversized-tee-back-black.jpg";
 
 export const products: Product[] = [
   {
@@ -33,7 +34,7 @@ export const products: Product[] = [
     category: "oversized",
     type: "T-Shirt",
     image: productOversizedTee,
-    hoverImage: productOversizedTeeModel,
+    hoverImage: productOversizedTeeBackBlack,
     sizes: ["S", "M", "L", "XL", "XXL"],
     colors: ["Black", "Charcoal", "Off-White"],
     fit: "Relaxed",
