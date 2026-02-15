@@ -7,6 +7,7 @@ import { CartProvider } from "@/context/CartContext";
 import Navbar from "@/components/Navbar";
 import CartSheet from "@/components/CartSheet";
 import Footer from "@/components/Footer";
+import AmbientAudioToggle from "@/components/AmbientAudioToggle";
 import Index from "./pages/Index";
 import Shop from "./pages/Shop";
 import ProductDetail from "./pages/ProductDetail";
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
           <Footer />
+          <AmbientAudioToggle />
         </BrowserRouter>
       </CartProvider>
     </TooltipProvider>
