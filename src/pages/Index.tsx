@@ -5,6 +5,7 @@ import heroModel from "@/assets/hero-model.png";
 import ProductCard from "@/components/ProductCard";
 import ParticleField from "@/components/ParticleField";
 import { products } from "@/data/products";
+import { useDayNightAmbiance } from "@/hooks/useDayNightAmbiance";
 import { useRef } from "react";
 
 const cinematic = {
@@ -35,6 +36,7 @@ const Index = () => {
   const featuredProducts = products.slice(0, 4);
   const heroRef = useRef(null);
   const collectionsRef = useRef(null);
+  useDayNightAmbiance();
 
   const { scrollYProgress: heroProgress } = useScroll({
     target: heroRef,

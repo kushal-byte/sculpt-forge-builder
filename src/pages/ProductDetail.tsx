@@ -5,6 +5,8 @@ import { ArrowLeft, Check } from "lucide-react";
 import { products } from "@/data/products";
 import { useCart } from "@/context/CartContext";
 import ProductCard from "@/components/ProductCard";
+import ProductHotspots, { getProductHotspots } from "@/components/ProductHotspots";
+import FabricFlowCanvas from "@/components/FabricFlowCanvas";
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -12,6 +14,7 @@ const ProductDetail = () => {
   const { addItem } = useCart();
   const [selectedSize, setSelectedSize] = useState("");
   const [added, setAdded] = useState(false);
+  const [showFlow, setShowFlow] = useState(false);
 
   if (!product) {
     return (
@@ -24,6 +27,8 @@ const ProductDetail = () => {
   const relatedProducts = products
     .filter((p) => p.category === product.category && p.id !== product.id)
     .slice(0, 4);
+
+  const hotspots = getProductHotspots(product);
 
   const handleAddToCart = () => {
     if (!selectedSize) return;
@@ -44,17 +49,43 @@ const ProductDetail = () => {
 
         {/* Product */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 pb-24">
-          {/* Image */}
+          {/* Image with hotspots */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="aspect-[3/4] overflow-hidden bg-secondary"
+            className="relative aspect-[3/4] overflow-hidden bg-secondary"
           >
+            {/* Main product image */}
             <img
               src={product.image}
               alt={product.name}
               className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
             />
+
+            {/* Interactive hotspots overlay */}
+            <ProductHotspots hotspots={hotspots} />
+
+            {/* Fabric flow toggle */}
+            <button
+              onClick={() => setShowFlow(!showFlow)}
+              className="absolute top-3 right-3 z-20 bg-card/80 backdrop-blur-sm border border-border px-3 py-1.5 font-display text-[10px] tracking-[0.15em] text-foreground hover:bg-card transition-colors"
+            >
+              {showFlow ? "HIDE FLOW" : "FABRIC FLOW"}
+            </button>
+
+            {/* Fabric flow canvas overlay */}
+            {showFlow && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="absolute inset-0 z-10"
+              >
+                <FabricFlowCanvas
+                  imageSrc={product.image}
+                  className="w-full h-full"
+                />
+              </motion.div>
+            )}
           </motion.div>
 
           {/* Details */}
@@ -71,6 +102,11 @@ const ProductDetail = () => {
             <p className="mt-3 font-display text-2xl text-foreground">₹{product.price}</p>
 
             <p className="mt-6 font-body text-sm text-muted-foreground leading-relaxed">{product.description}</p>
+
+            {/* Hotspot hint */}
+            <p className="mt-2 text-[10px] font-display tracking-[0.15em] text-ssg-gold/70">
+              ● TAP HOTSPOTS ON IMAGE TO EXPLORE FEATURES
+            </p>
 
             {/* Size Selector */}
             <div className="mt-8">
