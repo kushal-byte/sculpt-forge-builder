@@ -2,22 +2,14 @@ import { useRef, useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 /**
- * Symbiote-themed button wrapper.
- * - Tendrils extend on hover and form nodes near cursor
- * - Click triggers morphing symbiote splash effect
+ * Venom-style button with thick organic tendrils,
+ * viscous click splashes, and glossy highlights.
  */
 interface SymbioteButtonProps {
   children: React.ReactNode;
   onClick?: (e: React.MouseEvent) => void;
   className?: string;
   disabled?: boolean;
-}
-
-interface Tendril {
-  id: number;
-  angle: number;
-  length: number;
-  wobble: number;
 }
 
 interface Droplet {
@@ -33,16 +25,10 @@ const SymbioteButton = ({ children, onClick, className = "", disabled }: Symbiot
   const buttonRef = useRef<HTMLDivElement>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
-  const [tendrils] = useState<Tendril[]>(() =>
-    Array.from({ length: 10 }, (_, i) => ({
-      id: i,
-      angle: (i / 10) * Math.PI * 2,
-      length: 20 + Math.random() * 25,
-      wobble: Math.random() * 10,
-    }))
-  );
   const [droplets, setDroplets] = useState<Droplet[]>([]);
   const [clickRipple, setClickRipple] = useState(false);
+
+  const tendrilCount = 8;
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!buttonRef.current) return;
@@ -55,148 +41,171 @@ const SymbioteButton = ({ children, onClick, className = "", disabled }: Symbiot
 
   const handleClick = useCallback((e: React.MouseEvent) => {
     if (disabled) return;
-
-    // Generate splash droplets
-    const newDroplets: Droplet[] = Array.from({ length: 8 }, (_, i) => ({
-      id: Date.now() + i,
-      x: mousePos.x * 100,
-      y: mousePos.y * 100,
-      vx: (Math.random() - 0.5) * 60,
-      vy: (Math.random() - 0.5) * 60 - 20,
-      size: 3 + Math.random() * 5,
-    }));
+    const newDroplets: Droplet[] = Array.from({ length: 10 }, (_, i) => {
+      const angle = (i / 10) * Math.PI * 2 + Math.random() * 0.5;
+      const speed = 30 + Math.random() * 50;
+      return {
+        id: Date.now() + i,
+        x: mousePos.x * 100,
+        y: mousePos.y * 100,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 15,
+        size: 4 + Math.random() * 8,
+      };
+    });
     setDroplets(newDroplets);
     setClickRipple(true);
-
-    setTimeout(() => setDroplets([]), 800);
-    setTimeout(() => setClickRipple(false), 600);
-
+    setTimeout(() => setDroplets([]), 900);
+    setTimeout(() => setClickRipple(false), 700);
     onClick?.(e);
   }, [disabled, mousePos, onClick]);
 
-  // Clean droplets on unmount
   useEffect(() => {
     return () => setDroplets([]);
   }, []);
 
   return (
     <div ref={buttonRef} className="relative inline-block">
-      {/* Tendril SVG layer */}
+      {/* Venom tendril SVG layer */}
       <AnimatePresence>
         {isHovered && (
           <motion.svg
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="absolute -inset-8 pointer-events-none z-0"
-            viewBox="0 0 100 100"
+            transition={{ duration: 0.25 }}
+            className="absolute -inset-10 pointer-events-none z-0"
+            viewBox="0 0 120 120"
             preserveAspectRatio="none"
           >
-            {tendrils.map((t) => {
-              // Tendrils orient toward cursor
-              const cursorAngle = Math.atan2(mousePos.y - 0.5, mousePos.x - 0.5);
-              const angleDiff = Math.abs(t.angle - cursorAngle);
-              const proximity = 1 - Math.min(angleDiff, Math.PI * 2 - angleDiff) / Math.PI;
-              const adjustedLength = t.length * (0.5 + proximity * 1.2);
+            <defs>
+              <filter id="tendrilGlow">
+                <feGaussianBlur stdDeviation="2" result="b" />
+                <feComposite in="SourceGraphic" in2="b" operator="over" />
+              </filter>
+              <radialGradient id="tendrilFill" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor="hsl(var(--foreground))" stopOpacity="0.4" />
+                <stop offset="100%" stopColor="hsl(var(--foreground))" stopOpacity="0" />
+              </radialGradient>
+            </defs>
 
-              const sx = 50 + Math.cos(t.angle) * 25;
-              const sy = 50 + Math.sin(t.angle) * 25;
-              const ex = 50 + Math.cos(t.angle) * (25 + adjustedLength);
-              const ey = 50 + Math.sin(t.angle) * (25 + adjustedLength);
-              const cpx = (sx + ex) / 2 + Math.sin(t.wobble + Date.now() * 0.003) * 8;
-              const cpy = (sy + ey) / 2 + Math.cos(t.wobble + Date.now() * 0.003) * 8;
+            {Array.from({ length: tendrilCount }).map((_, i) => {
+              const baseAngle = (i / tendrilCount) * Math.PI * 2;
+              const cursorAngle = Math.atan2(mousePos.y - 0.5, mousePos.x - 0.5);
+              const angleDiff = Math.abs(baseAngle - cursorAngle);
+              const proximity = 1 - Math.min(angleDiff, Math.PI * 2 - angleDiff) / Math.PI;
+              const reach = 18 + proximity * 22;
+              const thickness = 2.5 + proximity * 3;
+
+              // Thick tapered tendril via filled path
+              const startR = 28;
+              const sx = 60 + Math.cos(baseAngle) * startR;
+              const sy = 60 + Math.sin(baseAngle) * startR;
+              const ex = 60 + Math.cos(baseAngle) * (startR + reach);
+              const ey = 60 + Math.sin(baseAngle) * (startR + reach);
+              const perp = baseAngle + Math.PI / 2;
+
+              // Control points with organic wobble
+              const cpOff = Math.sin(i * 2.3 + mousePos.x * 4) * 5;
+              const cpx = (sx + ex) / 2 + Math.cos(perp) * cpOff;
+              const cpy = (sy + ey) / 2 + Math.sin(perp) * cpOff;
+
+              // Build thick path (two sides)
+              const halfT = thickness / 2;
+              const tipT = 0.5;
+              const p = [
+                `M ${sx + Math.cos(perp) * halfT} ${sy + Math.sin(perp) * halfT}`,
+                `Q ${cpx + Math.cos(perp) * halfT * 0.6} ${cpy + Math.sin(perp) * halfT * 0.6} ${ex + Math.cos(perp) * tipT} ${ey + Math.sin(perp) * tipT}`,
+                `L ${ex - Math.cos(perp) * tipT} ${ey - Math.sin(perp) * tipT}`,
+                `Q ${cpx - Math.cos(perp) * halfT * 0.6} ${cpy - Math.sin(perp) * halfT * 0.6} ${sx - Math.cos(perp) * halfT} ${sy - Math.sin(perp) * halfT}`,
+                "Z"
+              ].join(" ");
 
               return (
-                <motion.path
-                  key={t.id}
-                  d={`M ${sx} ${sy} Q ${cpx} ${cpy} ${ex} ${ey}`}
-                  stroke="hsl(var(--foreground) / 0.25)"
-                  strokeWidth="0.8"
-                  fill="none"
-                  strokeLinecap="round"
-                  initial={{ pathLength: 0 }}
-                  animate={{ pathLength: 1 }}
-                  exit={{ pathLength: 0 }}
-                  transition={{ duration: 0.4, delay: t.id * 0.03, ease: [0.22, 1, 0.36, 1] }}
-                />
-              );
-            })}
-
-            {/* Proximity nodes */}
-            {tendrils.filter((_, i) => i % 3 === 0).map((t) => {
-              const cursorAngle = Math.atan2(mousePos.y - 0.5, mousePos.x - 0.5);
-              const angleDiff = Math.abs(t.angle - cursorAngle);
-              const proximity = 1 - Math.min(angleDiff, Math.PI * 2 - angleDiff) / Math.PI;
-
-              if (proximity < 0.5) return null;
-
-              const nx = 50 + Math.cos(t.angle) * (25 + t.length * 0.6);
-              const ny = 50 + Math.sin(t.angle) * (25 + t.length * 0.6);
-
-              return (
-                <motion.circle
-                  key={`node-${t.id}`}
-                  cx={nx}
-                  cy={ny}
-                  r={1.5 + proximity * 2}
-                  fill="hsl(var(--ssg-gold) / 0.4)"
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{
-                    scale: [1, 1.5, 1],
-                    opacity: [0.3, 0.7, 0.3],
-                  }}
-                  transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
-                />
+                <g key={i}>
+                  {/* Glow under */}
+                  <motion.path
+                    d={p}
+                    fill="hsl(var(--foreground) / 0.06)"
+                    filter="url(#tendrilGlow)"
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0, opacity: 0 }}
+                    transition={{ duration: 0.35, delay: i * 0.025 }}
+                    style={{ transformOrigin: `${sx}px ${sy}px` }}
+                  />
+                  {/* Main tendril */}
+                  <motion.path
+                    d={p}
+                    fill="hsl(var(--foreground) / 0.2)"
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, delay: i * 0.025, ease: [0.22, 1, 0.36, 1] }}
+                    style={{ transformOrigin: `${sx}px ${sy}px` }}
+                  />
+                  {/* Highlight line */}
+                  <motion.line
+                    x1={sx}
+                    y1={sy}
+                    x2={ex}
+                    y2={ey}
+                    stroke="hsl(var(--foreground) / 0.08)"
+                    strokeWidth="0.5"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    exit={{ pathLength: 0 }}
+                    transition={{ duration: 0.35, delay: i * 0.02 }}
+                  />
+                </g>
               );
             })}
           </motion.svg>
         )}
       </AnimatePresence>
 
-      {/* Droplet splash effect */}
+      {/* Viscous droplet splash */}
       <AnimatePresence>
         {droplets.map((d) => (
           <motion.div
             key={d.id}
-            className="absolute rounded-full bg-foreground/30 pointer-events-none z-20"
+            className="absolute rounded-full pointer-events-none z-20"
             style={{
               left: `${d.x}%`,
               top: `${d.y}%`,
               width: d.size,
-              height: d.size,
+              height: d.size * 1.3,
+              background: "radial-gradient(ellipse at 30% 30%, hsl(var(--foreground) / 0.5), hsl(var(--foreground) / 0.15))",
             }}
-            initial={{ scale: 1, opacity: 0.8 }}
+            initial={{ scale: 1, opacity: 0.9 }}
             animate={{
               x: d.vx,
-              y: d.vy + 40,
-              scale: 0,
+              y: d.vy + 50,
+              scale: 0.2,
               opacity: 0,
             }}
             exit={{ opacity: 0 }}
-            transition={{
-              duration: 0.6,
-              ease: [0.22, 1, 0.36, 1],
-            }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           />
         ))}
       </AnimatePresence>
 
-      {/* Click ripple */}
+      {/* Ripple */}
       {clickRipple && (
         <motion.div
-          className="absolute inset-0 bg-foreground/10 pointer-events-none z-10"
-          initial={{ scale: 0.8, opacity: 0.5 }}
-          animate={{ scale: 1.5, opacity: 0 }}
-          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          className="absolute inset-0 pointer-events-none z-10"
+          initial={{ scale: 0.5, opacity: 0.4 }}
+          animate={{ scale: 2, opacity: 0 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           style={{
             borderRadius: "50%",
+            background: "radial-gradient(circle, hsl(var(--foreground) / 0.15), transparent 70%)",
             transformOrigin: `${mousePos.x * 100}% ${mousePos.y * 100}%`,
           }}
         />
       )}
 
-      {/* Actual button */}
+      {/* Button content */}
       <motion.div
         className={`relative z-10 ${className}`}
         onMouseEnter={() => setIsHovered(true)}
