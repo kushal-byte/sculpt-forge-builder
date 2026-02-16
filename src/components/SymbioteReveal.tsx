@@ -2,8 +2,8 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 /**
- * Full-screen symbiote reveal on page load.
- * A dark organic mass expands with fluid tendrils, then splits apart to reveal content.
+ * Full-screen Venom-style symbiote reveal.
+ * A viscous, glossy black mass with organic tendrils expands and splits to reveal content.
  */
 const SymbioteReveal = () => {
   const [phase, setPhase] = useState<"expanding" | "splitting" | "done">("expanding");
@@ -11,155 +11,234 @@ const SymbioteReveal = () => {
   const rafRef = useRef<number>(0);
   const startTime = useRef(Date.now());
 
-  const drawSymbiote = useCallback((ctx: CanvasRenderingContext2D, w: number, h: number, progress: number) => {
+  const drawVenomMass = useCallback((ctx: CanvasRenderingContext2D, w: number, h: number, progress: number) => {
     ctx.clearRect(0, 0, w, h);
-
     const cx = w / 2;
     const cy = h / 2;
+    const t = progress;
 
-    // Main mass
-    const blobCount = 8;
-    ctx.fillStyle = "hsl(0, 0%, 2%)";
+    // Background darkness
+    ctx.fillStyle = `rgba(0, 0, 0, ${t * 0.95})`;
+    ctx.fillRect(0, 0, w, h);
 
-    for (let b = 0; b < 3; b++) {
+    // Multiple organic blob layers for depth
+    for (let layer = 0; layer < 4; layer++) {
+      const layerScale = 1 - layer * 0.12;
+      const baseRadius = Math.max(w, h) * 0.55 * t * layerScale;
+      const points = 64;
+
       ctx.beginPath();
-      const layerAlpha = 1 - b * 0.15;
-      ctx.fillStyle = `hsla(0, 0%, ${2 + b * 3}%, ${layerAlpha})`;
-
-      for (let i = 0; i <= blobCount; i++) {
-        const angle = (i / blobCount) * Math.PI * 2;
-        const baseRadius = Math.min(w, h) * 0.6 * progress;
-        const wobble = Math.sin(angle * 3 + progress * 8 + b) * 40 * progress;
-        const tendrilStretch = Math.sin(angle * 5 + progress * 12) * 30 * progress;
-        const r = baseRadius + wobble + tendrilStretch + b * 15;
+      for (let i = 0; i <= points; i++) {
+        const angle = (i / points) * Math.PI * 2;
+        // Multiple noise frequencies for organic feel
+        const n1 = Math.sin(angle * 3 + t * 6 + layer * 1.5) * 0.15;
+        const n2 = Math.sin(angle * 7 + t * 10 + layer * 0.8) * 0.08;
+        const n3 = Math.sin(angle * 13 + t * 14 + layer * 2.1) * 0.04;
+        const distort = 1 + n1 + n2 + n3;
+        const r = baseRadius * distort;
 
         const x = cx + Math.cos(angle) * r;
         const y = cy + Math.sin(angle) * r;
 
         if (i === 0) ctx.moveTo(x, y);
         else {
-          const prevAngle = ((i - 0.5) / blobCount) * Math.PI * 2;
-          const cpR = baseRadius + Math.sin(prevAngle * 4 + progress * 10) * 50 * progress + b * 15;
-          const cpx = cx + Math.cos(prevAngle) * cpR;
-          const cpy = cy + Math.sin(prevAngle) * cpR;
+          // Smooth curves between points
+          const prevAngle = ((i - 0.5) / points) * Math.PI * 2;
+          const pn = 1 + Math.sin(prevAngle * 5 + t * 8 + layer) * 0.12;
+          const cpx = cx + Math.cos(prevAngle) * baseRadius * pn;
+          const cpy = cy + Math.sin(prevAngle) * baseRadius * pn;
           ctx.quadraticCurveTo(cpx, cpy, x, y);
         }
       }
       ctx.closePath();
+
+      // Glossy gradient for each layer
+      const grad = ctx.createRadialGradient(
+        cx - baseRadius * 0.3, cy - baseRadius * 0.3, 0,
+        cx, cy, baseRadius * 1.2
+      );
+      if (layer === 0) {
+        grad.addColorStop(0, `rgba(30, 30, 35, ${0.95 * t})`);
+        grad.addColorStop(0.5, `rgba(8, 8, 12, ${0.98 * t})`);
+        grad.addColorStop(1, `rgba(0, 0, 0, ${t})`);
+      } else if (layer === 1) {
+        grad.addColorStop(0, `rgba(25, 25, 30, ${0.7 * t})`);
+        grad.addColorStop(1, `rgba(5, 5, 8, ${0.9 * t})`);
+      } else {
+        // Highlight/sheen layers
+        grad.addColorStop(0, `rgba(60, 60, 70, ${0.15 * t})`);
+        grad.addColorStop(0.4, `rgba(20, 20, 25, ${0.3 * t})`);
+        grad.addColorStop(1, `rgba(0, 0, 0, 0)`);
+      }
+      ctx.fillStyle = grad;
       ctx.fill();
     }
 
-    // Tendrils extending outward
-    const tendrilCount = 12;
-    for (let t = 0; t < tendrilCount; t++) {
-      const angle = (t / tendrilCount) * Math.PI * 2 + progress * 0.5;
-      const length = Math.min(w, h) * 0.4 * progress;
-      const startR = Math.min(w, h) * 0.3 * progress;
+    // Thick organic tendrils reaching outward
+    const tendrilCount = 16;
+    for (let i = 0; i < tendrilCount; i++) {
+      const angle = (i / tendrilCount) * Math.PI * 2 + Math.sin(t * 3 + i) * 0.3;
+      const maxReach = Math.max(w, h) * 0.6 * t;
+      const startR = Math.max(w, h) * 0.3 * t;
+      const thickness = (8 + Math.sin(i * 2.7) * 4) * t;
 
+      // Draw thick tapered tendril
+      const segments = 12;
       ctx.beginPath();
-      ctx.strokeStyle = `hsla(0, 0%, 5%, ${0.6 * progress})`;
-      ctx.lineWidth = 3 - progress * 1.5;
-
-      const sx = cx + Math.cos(angle) * startR;
-      const sy = cy + Math.sin(angle) * startR;
-      ctx.moveTo(sx, sy);
-
-      const segments = 5;
-      for (let s = 1; s <= segments; s++) {
+      for (let s = 0; s <= segments; s++) {
         const frac = s / segments;
-        const deviation = Math.sin(frac * Math.PI * 2 + progress * 6 + t) * 25;
-        const ex = cx + Math.cos(angle + deviation * 0.01) * (startR + length * frac);
-        const ey = cy + Math.sin(angle + deviation * 0.01) * (startR + length * frac) + deviation;
-        ctx.lineTo(ex, ey);
+        const segAngle = angle + Math.sin(frac * Math.PI * 2 + t * 8 + i * 1.7) * 0.2 * frac;
+        const r = startR + (maxReach - startR) * frac;
+        const taper = thickness * (1 - frac * 0.85);
+        const perpAngle = segAngle + Math.PI / 2;
+
+        const px = cx + Math.cos(segAngle) * r + Math.cos(perpAngle) * taper;
+        const py = cy + Math.sin(segAngle) * r + Math.sin(perpAngle) * taper;
+
+        if (s === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
       }
-      ctx.stroke();
+      // Return on other side
+      for (let s = segments; s >= 0; s--) {
+        const frac = s / segments;
+        const segAngle = angle + Math.sin(frac * Math.PI * 2 + t * 8 + i * 1.7) * 0.2 * frac;
+        const r = startR + (maxReach - startR) * frac;
+        const taper = thickness * (1 - frac * 0.85);
+        const perpAngle = segAngle - Math.PI / 2;
+
+        const px = cx + Math.cos(segAngle) * r + Math.cos(perpAngle) * taper;
+        const py = cy + Math.sin(segAngle) * r + Math.sin(perpAngle) * taper;
+        ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+
+      const tGrad = ctx.createLinearGradient(
+        cx + Math.cos(angle) * startR, cy + Math.sin(angle) * startR,
+        cx + Math.cos(angle) * maxReach, cy + Math.sin(angle) * maxReach
+      );
+      tGrad.addColorStop(0, `rgba(10, 10, 14, ${0.9 * t})`);
+      tGrad.addColorStop(0.7, `rgba(5, 5, 8, ${0.6 * t})`);
+      tGrad.addColorStop(1, `rgba(0, 0, 0, 0)`);
+      ctx.fillStyle = tGrad;
+      ctx.fill();
     }
 
-    // Vein-like internal details
-    ctx.strokeStyle = `hsla(0, 0%, 12%, ${0.3 * progress})`;
-    ctx.lineWidth = 1;
-    for (let v = 0; v < 6; v++) {
-      const angle = (v / 6) * Math.PI * 2;
-      const veinLen = Math.min(w, h) * 0.25 * progress;
-      ctx.beginPath();
-      ctx.moveTo(cx, cy);
-      const points = 8;
-      for (let p = 1; p <= points; p++) {
-        const frac = p / points;
-        const jitter = Math.sin(frac * 5 + progress * 8 + v * 2) * 15;
-        ctx.lineTo(
-          cx + Math.cos(angle) * veinLen * frac + jitter,
-          cy + Math.sin(angle) * veinLen * frac + jitter * 0.5
-        );
-      }
-      ctx.stroke();
-    }
+    // Glossy highlight sheen
+    const sheenGrad = ctx.createRadialGradient(
+      cx - w * 0.15, cy - h * 0.2, 0,
+      cx, cy, Math.max(w, h) * 0.4 * t
+    );
+    sheenGrad.addColorStop(0, `rgba(255, 255, 255, ${0.06 * t})`);
+    sheenGrad.addColorStop(0.5, `rgba(255, 255, 255, ${0.02 * t})`);
+    sheenGrad.addColorStop(1, "rgba(255, 255, 255, 0)");
+    ctx.fillStyle = sheenGrad;
+    ctx.beginPath();
+    ctx.arc(cx, cy, Math.max(w, h) * 0.5 * t, 0, Math.PI * 2);
+    ctx.fill();
   }, []);
 
   const drawSplit = useCallback((ctx: CanvasRenderingContext2D, w: number, h: number, progress: number) => {
     ctx.clearRect(0, 0, w, h);
-
-    const splitGap = w * progress * 0.8;
     const cx = w / 2;
+    const cy = h / 2;
+    const t = progress;
 
-    // Left mass
+    // Fading background
+    ctx.fillStyle = `rgba(0, 0, 0, ${(1 - t) * 0.9})`;
+    ctx.fillRect(0, 0, w, h);
+
+    // Two separating masses
     for (let side = -1; side <= 1; side += 2) {
-      ctx.beginPath();
-      ctx.fillStyle = `hsla(0, 0%, 2%, ${1 - progress * 0.8})`;
+      const offsetX = side * w * t * 0.7;
+      const baseR = Math.max(w, h) * 0.5 * (1 - t * 0.4);
+      const points = 48;
 
-      const offsetX = side * splitGap / 2;
-      const points = 12;
+      ctx.beginPath();
       for (let i = 0; i <= points; i++) {
         const angle = (i / points) * Math.PI * 2;
-        const baseR = Math.min(w, h) * 0.5 * (1 - progress * 0.3);
-        const distort = Math.sin(angle * 3 + progress * 6) * 30 * (1 - progress);
-        const r = baseR + distort;
+        const n1 = Math.sin(angle * 4 + t * 5 + side * 2) * 0.12 * (1 - t);
+        const n2 = Math.sin(angle * 9 + t * 8) * 0.06 * (1 - t);
+        const stretch = side * Math.cos(angle) > 0 ? 1 + t * 0.6 : 1 - t * 0.3;
+        const r = baseR * (1 + n1 + n2) * stretch;
 
-        // Stretch horizontally away from center
-        const stretchX = side * progress * 200;
-        const x = cx + offsetX + Math.cos(angle) * r * (1 + progress * 0.5) + stretchX;
-        const y = h / 2 + Math.sin(angle) * r * (1 - progress * 0.2);
+        const x = cx + offsetX + Math.cos(angle) * r;
+        const y = cy + Math.sin(angle) * r * (1 - t * 0.15);
 
         if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
+        else {
+          const pa = ((i - 0.5) / points) * Math.PI * 2;
+          const pr = baseR * (1 + Math.sin(pa * 6 + t * 7) * 0.1) * stretch;
+          ctx.quadraticCurveTo(
+            cx + offsetX + Math.cos(pa) * pr,
+            cy + Math.sin(pa) * pr * (1 - t * 0.15),
+            x, y
+          );
+        }
       }
       ctx.closePath();
+
+      const mGrad = ctx.createRadialGradient(
+        cx + offsetX - baseR * 0.2, cy - baseR * 0.2, 0,
+        cx + offsetX, cy, baseR
+      );
+      mGrad.addColorStop(0, `rgba(25, 25, 30, ${(1 - t) * 0.9})`);
+      mGrad.addColorStop(0.6, `rgba(8, 8, 12, ${(1 - t) * 0.95})`);
+      mGrad.addColorStop(1, `rgba(0, 0, 0, ${(1 - t) * 0.8})`);
+      ctx.fillStyle = mGrad;
       ctx.fill();
+    }
 
-      // Dripping strands between halves
-      if (progress > 0.1 && progress < 0.8) {
-        const strandCount = 6;
-        for (let s = 0; s < strandCount; s++) {
-          const sy = h * 0.3 + (h * 0.4 * s) / strandCount;
-          const thickness = 2 * (1 - progress);
-          const strandProgress = Math.max(0, 1 - progress * 2 + s * 0.1);
+    // Viscous strands stretching between halves
+    if (t > 0.05 && t < 0.85) {
+      const strandCount = 10;
+      for (let s = 0; s < strandCount; s++) {
+        const sy = h * 0.2 + (h * 0.6 * s) / strandCount;
+        const strandAlpha = Math.max(0, 1 - t * 1.8 + s * 0.05);
+        const thickness = (4 + Math.sin(s * 1.3) * 2) * strandAlpha;
+        const leftX = cx - w * t * 0.5;
+        const rightX = cx + w * t * 0.5;
+        const midSag = 15 * t + Math.sin(t * 6 + s) * 10;
 
+        if (thickness > 0.3) {
+          // Draw thick viscous strand
           ctx.beginPath();
-          ctx.strokeStyle = `hsla(0, 0%, 5%, ${strandProgress * 0.5})`;
-          ctx.lineWidth = thickness;
-          ctx.moveTo(cx - splitGap * 0.3, sy + Math.sin(progress * 4 + s) * 10);
-          ctx.quadraticCurveTo(
-            cx, sy + 20 * progress + Math.sin(progress * 6) * 15,
-            cx + splitGap * 0.3, sy + Math.sin(progress * 4 + s + 1) * 10
-          );
+          ctx.moveTo(leftX, sy - thickness / 2);
+          ctx.quadraticCurveTo(cx, sy + midSag - thickness / 2, rightX, sy - thickness / 2);
+          ctx.lineTo(rightX, sy + thickness / 2);
+          ctx.quadraticCurveTo(cx, sy + midSag + thickness / 2 + 3, leftX, sy + thickness / 2);
+          ctx.closePath();
+
+          ctx.fillStyle = `rgba(8, 8, 12, ${strandAlpha * 0.7})`;
+          ctx.fill();
+
+          // Strand highlight
+          ctx.beginPath();
+          ctx.moveTo(leftX, sy - thickness * 0.2);
+          ctx.quadraticCurveTo(cx, sy + midSag - thickness * 0.3, rightX, sy - thickness * 0.2);
+          ctx.strokeStyle = `rgba(60, 60, 70, ${strandAlpha * 0.3})`;
+          ctx.lineWidth = 0.5;
           ctx.stroke();
         }
       }
     }
 
-    // Droplets falling
-    if (progress > 0.3) {
-      const dropCount = 8;
-      for (let d = 0; d < dropCount; d++) {
-        const dropProgress = Math.max(0, (progress - 0.3) * 1.4);
-        const dx = cx + (Math.sin(d * 3.7) * w * 0.3);
-        const dy = h * 0.4 + dropProgress * h * 0.5 + d * 20;
-        const dropSize = 4 * (1 - dropProgress);
+    // Dripping droplets
+    if (t > 0.2) {
+      for (let d = 0; d < 12; d++) {
+        const dropT = Math.max(0, (t - 0.2 - d * 0.03) * 1.5);
+        if (dropT <= 0 || dropT > 1) continue;
+        const dx = cx + Math.sin(d * 4.3 + 1.7) * w * 0.35;
+        const dy = cy + dropT * h * 0.6 + Math.sin(d * 2.1) * 30;
+        const dropW = (3 + Math.sin(d) * 2) * (1 - dropT * 0.7);
+        const dropH = dropW * 1.8 + dropT * 8;
 
-        if (dropSize > 0) {
+        if (dropW > 0.5) {
           ctx.beginPath();
-          ctx.fillStyle = `hsla(0, 0%, 3%, ${(1 - dropProgress) * 0.6})`;
-          ctx.ellipse(dx, dy, dropSize, dropSize * 1.5, 0, 0, Math.PI * 2);
+          ctx.ellipse(dx, dy, dropW, dropH, 0, 0, Math.PI * 2);
+          const dGrad = ctx.createRadialGradient(dx - dropW * 0.3, dy - dropH * 0.3, 0, dx, dy, dropH);
+          dGrad.addColorStop(0, `rgba(30, 30, 35, ${(1 - dropT) * 0.8})`);
+          dGrad.addColorStop(1, `rgba(5, 5, 8, ${(1 - dropT) * 0.6})`);
+          ctx.fillStyle = dGrad;
           ctx.fill();
         }
       }
@@ -172,27 +251,34 @@ const SymbioteReveal = () => {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    const resize = () => {
+      canvas.width = window.innerWidth * window.devicePixelRatio;
+      canvas.height = window.innerHeight * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    };
+    resize();
 
     const animate = () => {
       const elapsed = (Date.now() - startTime.current) / 1000;
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+
+      ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
 
       if (phase === "expanding") {
-        const progress = Math.min(1, elapsed / 1.2);
-        // Non-linear easing
-        const eased = 1 - Math.pow(1 - progress, 3);
-        drawSymbiote(ctx, canvas.width, canvas.height, eased);
+        const progress = Math.min(1, elapsed / 1.4);
+        const eased = 1 - Math.pow(1 - progress, 4);
+        drawVenomMass(ctx, w, h, eased);
         if (progress >= 1) {
           setPhase("splitting");
           startTime.current = Date.now();
         }
       } else if (phase === "splitting") {
-        const progress = Math.min(1, elapsed / 1.0);
+        const progress = Math.min(1, elapsed / 1.2);
         const eased = progress < 0.5
           ? 4 * progress * progress * progress
           : 1 - Math.pow(-2 * progress + 2, 3) / 2;
-        drawSplit(ctx, canvas.width, canvas.height, eased);
+        drawSplit(ctx, w, h, eased);
         if (progress >= 1) {
           setPhase("done");
         }
@@ -205,17 +291,21 @@ const SymbioteReveal = () => {
 
     rafRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [phase, drawSymbiote, drawSplit]);
+  }, [phase, drawVenomMass, drawSplit]);
 
   return (
     <AnimatePresence>
       {phase !== "done" && (
         <motion.div
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           className="fixed inset-0 z-[9999] pointer-events-none"
         >
-          <canvas ref={canvasRef} className="w-full h-full" />
+          <canvas
+            ref={canvasRef}
+            className="w-full h-full"
+            style={{ width: "100vw", height: "100vh" }}
+          />
         </motion.div>
       )}
     </AnimatePresence>
