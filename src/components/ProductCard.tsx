@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useCart } from "@/context/CartContext";
 import { Product } from "@/data/products";
+import SymbioteButton from "@/components/SymbioteButton";
 
 interface ProductCardProps {
   product: Product;
@@ -72,15 +73,18 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
           )}
 
           {/* Quick Add */}
-          <motion.button
+          <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={isHovered ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
             transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-            onClick={handleQuickAdd}
-            className="absolute bottom-0 left-0 right-0 bg-foreground text-background font-display text-xs tracking-[0.2em] py-3 hover:bg-foreground/90 transition-colors"
+            className="absolute bottom-0 left-0 right-0"
           >
-            QUICK ADD
-          </motion.button>
+            <SymbioteButton onClick={handleQuickAdd} className="w-full">
+              <div className="bg-foreground text-background font-display text-xs tracking-[0.2em] py-3 hover:bg-foreground/90 transition-colors text-center">
+                QUICK ADD
+              </div>
+            </SymbioteButton>
+          </motion.div>
         </div>
 
         <motion.div

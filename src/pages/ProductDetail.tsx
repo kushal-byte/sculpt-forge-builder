@@ -7,6 +7,7 @@ import { useCart } from "@/context/CartContext";
 import ProductCard from "@/components/ProductCard";
 import ProductHotspots, { getProductHotspots } from "@/components/ProductHotspots";
 import FabricFlowCanvas from "@/components/FabricFlowCanvas";
+import SymbioteButton from "@/components/SymbioteButton";
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -135,27 +136,31 @@ const ProductDetail = () => {
             </div>
 
             {/* Add to Cart */}
-            <button
+            <SymbioteButton
               onClick={handleAddToCart}
               disabled={!selectedSize}
-              className={`mt-8 w-full font-display text-sm tracking-[0.25em] py-4 transition-all ${
-                !selectedSize
-                  ? "bg-muted text-muted-foreground cursor-not-allowed"
-                  : added
-                  ? "bg-green-900 text-foreground"
-                  : "bg-foreground text-background hover:bg-foreground/90"
-              }`}
+              className="w-full"
             >
-              {added ? (
-                <span className="flex items-center justify-center gap-2">
-                  <Check className="w-4 h-4" /> ADDED TO CART
-                </span>
-              ) : !selectedSize ? (
-                "SELECT A SIZE"
-              ) : (
-                "ADD TO CART"
-              )}
-            </button>
+              <div
+                className={`w-full font-display text-sm tracking-[0.25em] py-4 transition-all text-center ${
+                  !selectedSize
+                    ? "bg-muted text-muted-foreground cursor-not-allowed"
+                    : added
+                    ? "bg-green-900 text-foreground"
+                    : "bg-foreground text-background hover:bg-foreground/90"
+                }`}
+              >
+                {added ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <Check className="w-4 h-4" /> ADDED TO CART
+                  </span>
+                ) : !selectedSize ? (
+                  "SELECT A SIZE"
+                ) : (
+                  "ADD TO CART"
+                )}
+              </div>
+            </SymbioteButton>
 
             {/* Features */}
             <div className="mt-10 border-t border-border pt-8">

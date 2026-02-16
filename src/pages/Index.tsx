@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react";
 import heroModel from "@/assets/hero-model.png";
 import ProductCard from "@/components/ProductCard";
 import ParticleField from "@/components/ParticleField";
+import SymbioteVeinDivider from "@/components/SymbioteVeinDivider";
 import { products } from "@/data/products";
 import { useDayNightAmbiance } from "@/hooks/useDayNightAmbiance";
 import { useRef } from "react";
@@ -163,6 +164,8 @@ const Index = () => {
         </motion.div>
       </section>
 
+      <SymbioteVeinDivider seed={1} />
+
       {/* Featured Collections — cinematic stagger reveal */}
       <section ref={collectionsRef} className="max-w-[1400px] mx-auto px-6 py-24 relative">
         <motion.h2
@@ -205,6 +208,8 @@ const Index = () => {
         </motion.div>
       </section>
 
+      <SymbioteVeinDivider seed={42} flip />
+
       {/* Brand Statement — depth parallax */}
       <section className="bg-card border-y border-border relative overflow-hidden">
         <ParticleField className="opacity-40" />
@@ -225,6 +230,8 @@ const Index = () => {
           </motion.div>
         </div>
       </section>
+
+      <SymbioteVeinDivider seed={77} />
 
       {/* Featured Products — staggered cinematic reveal */}
       <section className="max-w-[1400px] mx-auto px-6 py-24">
@@ -255,6 +262,7 @@ const Index = () => {
           ))}
         </div>
       </section>
+      <SymbioteVeinDivider seed={123} flip />
 
       {/* Social Proof */}
       <section className="bg-card border-y border-border py-24 relative overflow-hidden">
