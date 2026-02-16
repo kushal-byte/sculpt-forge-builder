@@ -8,6 +8,8 @@ import Navbar from "@/components/Navbar";
 import CartSheet from "@/components/CartSheet";
 import Footer from "@/components/Footer";
 import AmbientAudioToggle from "@/components/AmbientAudioToggle";
+import SymbioteReveal from "@/components/SymbioteReveal";
+import SymbioteIdleEffects from "@/components/SymbioteIdleEffects";
 import Index from "./pages/Index";
 import Shop from "./pages/Shop";
 import ProductDetail from "./pages/ProductDetail";
@@ -23,6 +25,8 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <SymbioteReveal />
+          <SymbioteIdleEffects />
           <Navbar />
           <CartSheet />
           <Routes>
