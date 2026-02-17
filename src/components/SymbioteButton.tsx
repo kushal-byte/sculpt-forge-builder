@@ -2,8 +2,8 @@ import { useRef, useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 /**
- * Venom-style button with thick organic tendrils,
- * viscous click splashes, and glossy highlights.
+ * Movie-accurate Venom button with thick muscular tendrils,
+ * wet iridescent highlights, and viscous click splashes.
  */
 interface SymbioteButtonProps {
   children: React.ReactNode;
@@ -28,7 +28,7 @@ const SymbioteButton = ({ children, onClick, className = "", disabled }: Symbiot
   const [droplets, setDroplets] = useState<Droplet[]>([]);
   const [clickRipple, setClickRipple] = useState(false);
 
-  const tendrilCount = 8;
+  const tendrilCount = 10;
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!buttonRef.current) return;
@@ -41,16 +41,16 @@ const SymbioteButton = ({ children, onClick, className = "", disabled }: Symbiot
 
   const handleClick = useCallback((e: React.MouseEvent) => {
     if (disabled) return;
-    const newDroplets: Droplet[] = Array.from({ length: 10 }, (_, i) => {
-      const angle = (i / 10) * Math.PI * 2 + Math.random() * 0.5;
-      const speed = 30 + Math.random() * 50;
+    const newDroplets: Droplet[] = Array.from({ length: 12 }, (_, i) => {
+      const angle = (i / 12) * Math.PI * 2 + Math.random() * 0.4;
+      const speed = 35 + Math.random() * 55;
       return {
         id: Date.now() + i,
         x: mousePos.x * 100,
         y: mousePos.y * 100,
         vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed - 15,
-        size: 4 + Math.random() * 8,
+        vy: Math.sin(angle) * speed - 20,
+        size: 4 + Math.random() * 10,
       };
     });
     setDroplets(newDroplets);
@@ -73,20 +73,16 @@ const SymbioteButton = ({ children, onClick, className = "", disabled }: Symbiot
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
-            className="absolute -inset-10 pointer-events-none z-0"
+            transition={{ duration: 0.3 }}
+            className="absolute -inset-12 pointer-events-none z-0"
             viewBox="0 0 120 120"
             preserveAspectRatio="none"
           >
             <defs>
               <filter id="tendrilGlow">
-                <feGaussianBlur stdDeviation="2" result="b" />
+                <feGaussianBlur stdDeviation="3" result="b" />
                 <feComposite in="SourceGraphic" in2="b" operator="over" />
               </filter>
-              <radialGradient id="tendrilFill" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="hsl(var(--foreground))" stopOpacity="0.4" />
-                <stop offset="100%" stopColor="hsl(var(--foreground))" stopOpacity="0" />
-              </radialGradient>
             </defs>
 
             {Array.from({ length: tendrilCount }).map((_, i) => {
@@ -94,68 +90,81 @@ const SymbioteButton = ({ children, onClick, className = "", disabled }: Symbiot
               const cursorAngle = Math.atan2(mousePos.y - 0.5, mousePos.x - 0.5);
               const angleDiff = Math.abs(baseAngle - cursorAngle);
               const proximity = 1 - Math.min(angleDiff, Math.PI * 2 - angleDiff) / Math.PI;
-              const reach = 18 + proximity * 22;
-              const thickness = 2.5 + proximity * 3;
+              const reach = 20 + proximity * 28;
+              const thickness = 3.5 + proximity * 4;
 
-              // Thick tapered tendril via filled path
-              const startR = 28;
+              const startR = 26;
               const sx = 60 + Math.cos(baseAngle) * startR;
               const sy = 60 + Math.sin(baseAngle) * startR;
-              const ex = 60 + Math.cos(baseAngle) * (startR + reach);
-              const ey = 60 + Math.sin(baseAngle) * (startR + reach);
               const perp = baseAngle + Math.PI / 2;
 
-              // Control points with organic wobble
-              const cpOff = Math.sin(i * 2.3 + mousePos.x * 4) * 5;
-              const cpx = (sx + ex) / 2 + Math.cos(perp) * cpOff;
-              const cpy = (sy + ey) / 2 + Math.sin(perp) * cpOff;
+              // Build thick tapered tendril with organic curve
+              const segments = 5;
+              const leftPts: string[] = [];
+              const rightPts: string[] = [];
 
-              // Build thick path (two sides)
-              const halfT = thickness / 2;
-              const tipT = 0.5;
-              const p = [
-                `M ${sx + Math.cos(perp) * halfT} ${sy + Math.sin(perp) * halfT}`,
-                `Q ${cpx + Math.cos(perp) * halfT * 0.6} ${cpy + Math.sin(perp) * halfT * 0.6} ${ex + Math.cos(perp) * tipT} ${ey + Math.sin(perp) * tipT}`,
-                `L ${ex - Math.cos(perp) * tipT} ${ey - Math.sin(perp) * tipT}`,
-                `Q ${cpx - Math.cos(perp) * halfT * 0.6} ${cpy - Math.sin(perp) * halfT * 0.6} ${sx - Math.cos(perp) * halfT} ${sy - Math.sin(perp) * halfT}`,
-                "Z"
-              ].join(" ");
+              for (let s = 0; s <= segments; s++) {
+                const frac = s / segments;
+                const wobble = Math.sin(i * 2.3 + frac * Math.PI * 2 + mousePos.x * 3) * 3 * frac;
+                const segAngle = baseAngle + wobble * 0.02;
+                const r = startR + reach * frac;
+                const taper = thickness * (1 - frac * frac * 0.9);
+                const perpA = segAngle + Math.PI / 2;
+
+                const px = 60 + Math.cos(segAngle) * r;
+                const py = 60 + Math.sin(segAngle) * r;
+
+                leftPts.push(`${px + Math.cos(perpA) * taper} ${py + Math.sin(perpA) * taper}`);
+                rightPts.unshift(`${px - Math.cos(perpA) * taper} ${py - Math.sin(perpA) * taper}`);
+              }
+
+              const pathData = `M ${leftPts[0]} ` +
+                leftPts.slice(1).map((p, idx) => {
+                  const prev = leftPts[idx].split(" ").map(Number);
+                  const curr = p.split(" ").map(Number);
+                  return `Q ${(prev[0] + curr[0]) / 2} ${(prev[1] + curr[1]) / 2} ${curr[0]} ${curr[1]}`;
+                }).join(" ") +
+                ` L ${rightPts[0]} ` +
+                rightPts.slice(1).map((p, idx) => {
+                  const prev = rightPts[idx].split(" ").map(Number);
+                  const curr = p.split(" ").map(Number);
+                  return `Q ${(prev[0] + curr[0]) / 2} ${(prev[1] + curr[1]) / 2} ${curr[0]} ${curr[1]}`;
+                }).join(" ") +
+                " Z";
 
               return (
                 <g key={i}>
                   {/* Glow under */}
                   <motion.path
-                    d={p}
-                    fill="hsl(var(--foreground) / 0.06)"
+                    d={pathData}
+                    fill="rgba(10, 10, 20, 0.15)"
                     filter="url(#tendrilGlow)"
                     initial={{ scale: 0, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     exit={{ scale: 0, opacity: 0 }}
-                    transition={{ duration: 0.35, delay: i * 0.025 }}
+                    transition={{ duration: 0.35, delay: i * 0.02 }}
                     style={{ transformOrigin: `${sx}px ${sy}px` }}
                   />
-                  {/* Main tendril */}
+                  {/* Main tendril body */}
                   <motion.path
-                    d={p}
-                    fill="hsl(var(--foreground) / 0.2)"
+                    d={pathData}
+                    fill="rgba(5, 5, 14, 0.35)"
                     initial={{ scale: 0, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     exit={{ scale: 0, opacity: 0 }}
-                    transition={{ duration: 0.3, delay: i * 0.025, ease: [0.22, 1, 0.36, 1] }}
+                    transition={{ duration: 0.3, delay: i * 0.02, ease: [0.22, 1, 0.36, 1] }}
                     style={{ transformOrigin: `${sx}px ${sy}px` }}
                   />
-                  {/* Highlight line */}
-                  <motion.line
-                    x1={sx}
-                    y1={sy}
-                    x2={ex}
-                    y2={ey}
-                    stroke="hsl(var(--foreground) / 0.08)"
-                    strokeWidth="0.5"
+                  {/* Specular highlight */}
+                  <motion.path
+                    d={pathData}
+                    fill="none"
+                    stroke="rgba(80, 100, 180, 0.08)"
+                    strokeWidth="0.4"
                     initial={{ pathLength: 0 }}
                     animate={{ pathLength: 1 }}
                     exit={{ pathLength: 0 }}
-                    transition={{ duration: 0.35, delay: i * 0.02 }}
+                    transition={{ duration: 0.4, delay: i * 0.015 }}
                   />
                 </g>
               );
@@ -174,16 +183,11 @@ const SymbioteButton = ({ children, onClick, className = "", disabled }: Symbiot
               left: `${d.x}%`,
               top: `${d.y}%`,
               width: d.size,
-              height: d.size * 1.3,
-              background: "radial-gradient(ellipse at 30% 30%, hsl(var(--foreground) / 0.5), hsl(var(--foreground) / 0.15))",
+              height: d.size * 1.4,
+              background: "radial-gradient(ellipse at 30% 25%, rgba(25, 25, 40, 0.6), rgba(5, 5, 14, 0.2))",
             }}
             initial={{ scale: 1, opacity: 0.9 }}
-            animate={{
-              x: d.vx,
-              y: d.vy + 50,
-              scale: 0.2,
-              opacity: 0,
-            }}
+            animate={{ x: d.vx, y: d.vy + 50, scale: 0.15, opacity: 0 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           />
@@ -194,12 +198,12 @@ const SymbioteButton = ({ children, onClick, className = "", disabled }: Symbiot
       {clickRipple && (
         <motion.div
           className="absolute inset-0 pointer-events-none z-10"
-          initial={{ scale: 0.5, opacity: 0.4 }}
-          animate={{ scale: 2, opacity: 0 }}
+          initial={{ scale: 0.5, opacity: 0.3 }}
+          animate={{ scale: 2.2, opacity: 0 }}
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           style={{
             borderRadius: "50%",
-            background: "radial-gradient(circle, hsl(var(--foreground) / 0.15), transparent 70%)",
+            background: "radial-gradient(circle, rgba(20, 20, 40, 0.2), transparent 70%)",
             transformOrigin: `${mousePos.x * 100}% ${mousePos.y * 100}%`,
           }}
         />
